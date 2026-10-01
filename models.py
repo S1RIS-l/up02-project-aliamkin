@@ -1,42 +1,43 @@
-"""Модели данных для проекта УП.02."""
+"""Модели данных для проекта УП.02"""
+
+from datetime import datetime
+from discount import calculate_price_with_discount
 
 
 class Product:
     """Класс Товар (объект недвижимости)."""
 
-    def __init__(self, product_id, ptype, adress, area, price, qty, photo):
-        """
-        Инициализация товара.
-        :param product_id: идентификатор
-        :param тип: тип жилья
-        :param адрес: адрес
-        :param площадь: площадь, м²
-        :param цена: цена, руб.
-        :param количество: количество объектов
-        :param фото: имя файла изображения
-        """
+    def __init__(self, product_id, name, category, price, quantity, area=0):
         self.id = product_id
-        self.ptype = ptype
-        self.adress = adress
-        self.area = area
+        self.name = name
+        self.category = category 
         self.price = price
-        self.qty = qty
-        self.photo = photo
+        self.quantity = quantity
+        self.area = area 
 
     def total(self):
-        """Общая стоимость (цена × количество)."""
-        return self.price * self.qty
+        """Общая стоимость."""
+        return self.price * self.quantity
 
-    def price_with_discount(self, discount):
-        """Цена со скидкой в процентах."""
-        return self.price * (1 - discount / 100)
+    def price_with_discount_auto(self, date=None):
+        """Цена со скидкой по алгоритму ДЭ (5% при площади > 100)."""
+        if date is None:
+            date = datetime.now()
+        return calculate_price_with_discount(self.id, self.price, date)
 
     def indicator(self):
-        """«много» или «мало» (порог 5)."""
-        return "много" if self.qty >= 5 else "мало"
+        """Индикатор наличия."""
+        return "много" if self.quantity > 5 else "мало"
 
     def info(self):
-        """Строка с информацией о товаре."""
-        return (f"{self.ptype} ({self.adress}): {self.price} руб. × "
-                f"{self.qty} = {self.total()} руб. "
-                f"({self.indicator()})")
+        """Информация о товаре."""
+        return (
+            f"{self.name} ({self.category}): "
+            f"{self.price} руб. × {self.quantity} = {self.total()} руб. "
+            f"(площадь: {self.area} кв.м)"
+        )
+    
+if __name__ == "__main__":
+    p = Product(6, "Пентхаус", "ул. Речная, 1", 32000000, 1, area=140)
+    print(f"Базовая цена: {p.price}")
+    print(f"Со скидкой: {p.price_with_discount_auto()}")

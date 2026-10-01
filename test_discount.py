@@ -4,17 +4,6 @@
 from discount import calculate_price_with_discount
 
 
-def print_test_report(passed, total):
-    """Отчёт о тестировании"""
-    print()
-    print("=" * 40)
-    print(f"Пройдено: {passed} / {total}")
-    if passed == total:
-        print("Результат: ✅ УСПЕХ")
-    else:
-        print("Результат: ❌ ЕСТЬ ОШИБКИ")
-    print("=" * 40)
-
 
 def run_tests():
     """Запуск тестов алгоритма расчёта скидки."""
@@ -53,6 +42,17 @@ def run_tests():
     print(f"Пройдено: {passed} / {len(test_cases)}")
 
     print_test_report(passed, len(test_cases))
+
+def print_test_report(passed, total):
+    """Выводит отчёт о тестировании."""
+    print("=" * 40)
+    print("ОТЧЁТ О ТЕСТИРОВАНИИ")
+    print(f"Пройдено: {passed} / {total}")
+    if passed == total:
+        print("Результат: ✅ УСПЕХ")
+    else:
+        print("Результат: ❌ ЕСТЬ ОШИБКИ")
+    print("=" * 40)
 
 
 if __name__ == "__main__":

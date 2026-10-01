@@ -32,6 +32,10 @@ class Product:
     def indicator(self):
         """Индикатор наличия."""
         return "много" if self.quantity > 5 else "мало"
+    
+    def is_available(self):
+        """Товар доступен для заказа?"""
+        return self.quantity > 0
 
 
     def info(self):

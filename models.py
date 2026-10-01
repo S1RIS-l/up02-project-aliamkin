@@ -19,6 +19,10 @@ class Product:
         """Общая стоимость."""
         return self.price * self.quantity
 
+    def discounted_price(self):
+        """Цена со скидкой 25% (упрощённо)."""
+        return self.price * 0.75
+
     def price_with_discount_auto(self, date=None):
         """Цена со скидкой по алгоритму ДЭ (5% при площади > 100)."""
         if date is None:
@@ -29,6 +33,7 @@ class Product:
         """Индикатор наличия."""
         return "много" if self.quantity > 5 else "мало"
 
+
     def info(self):
         """Информация о товаре."""
         return (
@@ -36,6 +41,7 @@ class Product:
             f"{self.price} руб. × {self.quantity} = {self.total()} руб. "
             f"(площадь: {self.area} кв.м)"
         )
+
     
 if __name__ == "__main__":
     p = Product(6, "Пентхаус", "ул. Речная, 1", 32000000, 1, area=140)

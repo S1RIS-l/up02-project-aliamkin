@@ -1,0 +1,32 @@
+*   2f0ee4a (HEAD -> main, origin/main, origin/HEAD) Merge branch 'main' of https://github.com/S1RIS-l/up02-project-aliamkin
+|\  
+| * 1495deb Полная рабочая тетрадь Пара 8
+* | cd2621c Добавлен important.txt, лог и tmp проигнорированы
+* | 0e9d8c1 Добавлен .gitignore с правилами для Python
+|/  
+*   368d3ad Разрешён второй конфликт в README
+|\  
+| * a2ae85a Update README.md
+* | 28b9129 Удалённое изменение12
+|/  
+*   848bcc4 Merge pull request #2 from S1RIS-l/feature/homework-8
+|\  
+| * 811c92e (origin/feature/homework-8) Добавлен homework_info.txt в ветке feature/homework-8
+|/  
+* 3aec970 Полная рабочая тетрадь Пара 7
+*   04137fd Разрешён конфликт в README
+|\  
+| * 57aaa3e Удалённое изменение1
+* | 2f49e5e Удалённое изменение2
+|/  
+* 8fd1a86 Добавлен метод order_info в ветке feature/orders
+*   192625d Разрешён конфликт с GitHub
+|\  
+| * cf2c74f Update README.md
+* | 47721da Локальное изменение README
+|/  
+*   4a1c1a4 Merge pull request #1 from S1RIS-l/feature/remote-test
+|\  
+| * 78eb757 (origin/feature/remote-test) Добавлен файл в ветке feature/remote-test
+|/  
+* 8a5a5c1 Update README.md

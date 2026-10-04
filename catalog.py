@@ -4,7 +4,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import os
 
-from config import COLOR_HIGHLIGHT, FONT_FAMILY
+from config import COLOR_HIGHLIGHT, COLOR_MAIN_BG, FONT_FAMILY
 
 PATH_PICTURE = "resources/picture.png"
 
@@ -13,8 +13,14 @@ FONT_SIZE_HEADER = 14
 
 
 def _get_card_color(qty):
-    """Возвращает цвет фона карточки (подсветка ≤3)."""
-    return COLOR_HIGHLIGHT if qty <= 3 else "white"
+    """
+    Возвращает цвет фона карточки.
+    
+    :param qty: количество товара
+    :return: HEX-цвет
+    """
+    return COLOR_HIGHLIGHT if qty <= 3 else COLOR_MAIN_BG
+
 
 
 def _indicator(qty):

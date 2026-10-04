@@ -4,11 +4,33 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import os
 
-from styles import COLOR_HIGHLIGHT, FONT_FAMILY
+from styles import COLOR_HIGHLIGHT, FONT_FAMILY, FONT_SIZE_NORMAL
 
 # Пути к ресурсам
 PATH_PICTURE = "resources/picture.png"
 
+def get_card_color(qty):
+    """Возвращает цвет фона карточки (подсветка ≤3)."""
+    return COLOR_HIGHLIGHT if qty <= 3 else "white"
+
+
+def indicator(qty):
+    """Индикатор «много/мало» (порог 5)."""
+    return "много" if qty > 5 else "мало"
+
+
+def add_label(parent, text, bg_color, bold=False,
+               size=FONT_SIZE_NORMAL, align="w"):
+    """Добавляет метку с текстом."""
+    tk.Label(parent, text=text,
+             font=(FONT_FAMILY, size, "bold" if bold else "normal"),
+             bg=bg_color, anchor=align).pack(fill="x")
+
+
+def add_image(card, product, bg_color):
+    """Добавляет изображение товара (или заглушку)."""
+    img_frame = tk.Frame(card, bg=bg_color)
+    img_frame.pack(side="left", padx=10, pady=10)
 
 def create_product_card(parent, product):
     """Создаёт карточку товара по макету."""

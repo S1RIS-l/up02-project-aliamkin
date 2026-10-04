@@ -22,6 +22,7 @@ def create_product_card(parent, product):
     # Карточка — рамка со всех сторон
     card = tk.Frame(parent, bg=bg_color, bd=1, relief="solid")
     card.pack(fill="x", padx=10, pady=5)
+    tk.Frame(parent, height=1, bg="#cccccc").pack(fill="x", padx=10)
 
     # === Изображение (слева) ===
     img_frame = tk.Frame(card, bg=bg_color)

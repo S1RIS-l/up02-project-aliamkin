@@ -15,8 +15,8 @@ def get_all_orders():
     orders = []
     for row in rows:
         product = Product(
-            product_id=row[3], ptype="", adress="", area=0,
-            price=0, qty=0, photo=""
+            product_id=row[3], ptype="", address="", area=0,
+            price=0, quantity=0, photo=""
         )
         order = Order(
             order_id=row[0],

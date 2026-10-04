@@ -17,10 +17,10 @@ def get_all_products():
         product = Product(
             product_id=row[0],
             ptype=row[1],
-            adress=row[2],
+            address=row[2],
             area=row[3],
             price=row[4], 
-            qty=row[5],
+            quantity=row[5],
             photo=row[6]
         )
         products.append(product)
@@ -47,10 +47,10 @@ def get_products_by_category(category):
         product = Product(
                 product_id=row[0],
                 ptype=row[1],
-                adress=row[2],
+                address=row[2],
                 area=row[3],
                 price=row[4], 
-                qty=row[5],
+                quantity=row[5],
                 photo=row[6]
             )
         products.append(product)
@@ -70,10 +70,10 @@ def get_products_low_stock():
         product = Product(
                 product_id=row[0],
                 ptype=row[1],
-                adress=row[2],
+                address=row[2],
                 area=row[3],
                 price=row[4], 
-                qty=row[5],
+                quantity=row[5],
                 photo=row[6]
             )
         products.append(product)

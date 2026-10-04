@@ -99,6 +99,9 @@ def create_product_card(parent, product):
     qty = product.quantity
     bg_color = _get_card_color(qty)
 
+    print(f"[CARD] id={product.id}, name={product.ptype}, "
+          f"qty={qty}, bg={bg_color}, indicator={_indicator(qty)}")
+
     card = tk.Frame(parent, bg=bg_color, bd=1, relief="solid")
     card.pack(fill="x", padx=10, pady=5)
 

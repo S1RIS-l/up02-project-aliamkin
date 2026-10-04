@@ -40,7 +40,7 @@ def create_product_card(parent, product):
         img_label.pack()
     except Exception:
         # Если даже заглушка не открылась — текстовый фолбэк
-        tk.Label(img_frame, text="[НЕТ ФОТО]", bg=bg_color,
+        tk.Label(img_frame, text="[Нет фото]", bg=bg_color,
                  width=10, height=5).pack()
 
     # === Текстовая часть (справа) ===

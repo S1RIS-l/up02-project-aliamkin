@@ -4,22 +4,30 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import os
 
-from styles import COLOR_HIGHLIGHT, FONT_FAMILY, FONT_SIZE_NORMAL
+from config import COLOR_HIGHLIGHT, FONT_FAMILY
 
-# Пути к ресурсам
 PATH_PICTURE = "resources/picture.png"
 
-def get_card_color(qty):
+FONT_SIZE_NORMAL = 11
+FONT_SIZE_HEADER = 14
+
+
+def _get_card_color(qty):
     """Возвращает цвет фона карточки (подсветка ≤3)."""
     return COLOR_HIGHLIGHT if qty <= 3 else "white"
 
 
-def indicator(qty):
-    """Индикатор «много/мало» (порог 5)."""
+def _indicator(qty):
+    """
+    Индикатор «много/мало» (порог 5).
+
+    :param qty: количество товара
+    :return: «много» или «мало»
+    """
     return "много" if qty > 5 else "мало"
 
 
-def add_label(parent, text, bg_color, bold=False,
+def _add_label(parent, text, bg_color, bold=False,
                size=FONT_SIZE_NORMAL, align="w"):
     """Добавляет метку с текстом."""
     tk.Label(parent, text=text,
@@ -27,29 +35,12 @@ def add_label(parent, text, bg_color, bold=False,
              bg=bg_color, anchor=align).pack(fill="x")
 
 
-def add_image(card, product, bg_color):
+def _add_image(card, product, bg_color):
     """Добавляет изображение товара (или заглушку)."""
     img_frame = tk.Frame(card, bg=bg_color)
     img_frame.pack(side="left", padx=10, pady=10)
 
-def create_product_card(parent, product):
-    """Создаёт карточку товара по макету."""
-    qty = product.quantity
-    area = product.area
-    price = product.price
-
-    # Подсветка, если количество ≤ 3
-    bg_color = COLOR_HIGHLIGHT if qty <= 3 else "white"
-
-    # Карточка — рамка со всех сторон
-    card = tk.Frame(parent, bg=bg_color, bd=1, relief="solid")
-    card.pack(fill="x", padx=10, pady=5)
-    tk.Frame(parent, height=1, bg="#cccccc").pack(fill="x", padx=10)
-
-    # === Изображение (слева) ===
-    img_frame = tk.Frame(card, bg=bg_color)
-    img_frame.pack(side="left", padx=10, pady=10)
-
+    # Проверка существования файла
     image_path = product.photo if product.photo else PATH_PICTURE
     if not os.path.exists(image_path):
         image_path = PATH_PICTURE
@@ -61,38 +52,51 @@ def create_product_card(parent, product):
         img_label.image = photo  # сохраняем ссылку!
         img_label.pack()
     except Exception:
-        # Если даже заглушка не открылась — текстовый фолбэк
-        tk.Label(img_frame, text="[Нет фото]", bg=bg_color,
+        tk.Label(img_frame, text="[НЕТ ФОТО]", bg=bg_color,
                  width=10, height=5).pack()
 
-    # === Текстовая часть (справа) ===
+
+def _add_text_info(card, product, bg_color, qty):
+    """Добавляет текстовую информацию о товаре."""
     text_frame = tk.Frame(card, bg=bg_color)
-    text_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+    text_frame.pack(side="left", fill="both", expand=True,
+                    padx=10, pady=10)
 
-    tk.Label(text_frame, text=f"{product.address} | {product.ptype}",
-             font=(FONT_FAMILY, 14, "bold"), bg=bg_color,
-             anchor="w").pack(fill="x")
 
-    tk.Label(text_frame, text=f"Категория: {product.ptype}",
-             font=(FONT_FAMILY, 11), bg=bg_color,
-             anchor="w").pack(fill="x")
+    ptype = product.ptype if product.ptype else "[Без типа]"
+    address = product.address if product.address else "[Без адреса]"
+    area = product.area if product.area is not None else 0
+    price = product.price if product.price is not None else 0
 
-    indicator = "много" if qty > 5 else "мало"
-    tk.Label(text_frame, text=f"Количество: {indicator} ({qty})",
-             font=(FONT_FAMILY, 11), bg=bg_color,
-             anchor="w").pack(fill="x")
+    _add_label(text_frame, f"{address} | {ptype}",
+               bg_color, bold=True, size=FONT_SIZE_HEADER)
 
-    tk.Label(text_frame, text=f"Площадь: {area} кв.м",
-             font=(FONT_FAMILY, 11), bg=bg_color,
-             anchor="w").pack(fill="x")
+    _add_label(text_frame, f"Категория: {ptype}", bg_color)
+
+    indicator = _indicator(qty)
+    _add_label(text_frame, f"Количество: {indicator} ({qty})", bg_color)
+
+    _add_label(text_frame, f"Площадь: {area} кв.м", bg_color)
+
 
     if area > 100:
         price_text = f"{price * 0.95:,.0f} руб. (скидка 5%)"
     else:
         price_text = f"{price:,.0f} руб."
 
-    tk.Label(text_frame, text=price_text,
-             font=(FONT_FAMILY, 14, "bold"), bg=bg_color,
-             anchor="e").pack(fill="x")
+    _add_label(text_frame, price_text, bg_color,
+               bold=True, size=FONT_SIZE_HEADER, align="e")
+
+
+def create_product_card(parent, product):
+    """Создаёт карточку товара по макету."""
+    qty = product.quantity
+    bg_color = _get_card_color(qty)
+
+    card = tk.Frame(parent, bg=bg_color, bd=1, relief="solid")
+    card.pack(fill="x", padx=10, pady=5)
+
+    _add_image(card, product, bg_color)
+    _add_text_info(card, product, bg_color, qty)
 
     return card

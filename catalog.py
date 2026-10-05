@@ -30,6 +30,8 @@ def _indicator(qty):
     :param qty: количество товара
     :return: «много» или «мало»
     """
+    if not isinstance(qty, (int, float)):
+        return "мало"
     return "много" if qty > 5 else "мало"
 
 

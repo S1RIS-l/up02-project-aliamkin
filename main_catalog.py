@@ -1,21 +1,28 @@
-"""Главное окно с каталогом."""
+"""Главное окно с каталогом"""
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import os
 from PIL import Image, ImageTk
 
 from config import APP_TITLE
 import db_products as db
 from catalog import create_product_card
-
-# Пути к ресурсам
-PATH_LOGO = "resources/logo.png"
-PATH_ICON = "resources/icon.ico"
+from error_handler import safe_call
 
 COLOR_SECONDARY_BG = "#D2F6E7"
+COLOR_ACCENT = "#70B2AF"
 FONT_FAMILY = "Calibri"
 FONT_SIZE_TITLE = 18
+FONT_SIZE_NORMAL = 12
+
+PATH_LOGO = "resources/logo1.png"
+PATH_ICON = "resources/icon.ico"
+
+
+def font(size=FONT_SIZE_NORMAL, bold=False):
+    """Возвращает кортеж шрифта."""
+    return (FONT_FAMILY, size, "bold" if bold else "normal")
 
 
 def set_app_icon(root, icon_path):
@@ -31,9 +38,10 @@ def set_app_icon(root, icon_path):
                 img.thumbnail((32, 32))
                 icon_img = ImageTk.PhotoImage(img)
                 root.iconphoto(True, icon_img)
-                root._icon_photo = icon_img  # сохраняем ссылку
+                root._icon_photo = icon_img
     except Exception as e:
         print(f"Не удалось установить иконку: {e}")
+
 
 
 class CatalogWindow:
@@ -46,20 +54,22 @@ class CatalogWindow:
         self.load_products()
 
     def set_icon(self):
+        """Устанавливает иконку приложения."""
         set_app_icon(self.root, PATH_ICON)
 
     def build_ui(self):
-        # Шапка с логотипом и заголовком
+        """Строит интерфейс главного окна."""
+        # Шапка
         header = tk.Frame(self.root, bg=COLOR_SECONDARY_BG, height=80)
         header.pack(fill="x")
         header.pack_propagate(False)
 
-        # Логотип (слева) — с сохранением пропорций
+        # Логотип (слева)
         logo = None
         if os.path.exists(PATH_LOGO):
             try:
                 img = Image.open(PATH_LOGO)
-                img.thumbnail((60, 60))  # сохраняет пропорции!
+                img.thumbnail((60, 60))
                 logo = ImageTk.PhotoImage(img)
             except Exception:
                 logo = None
@@ -75,7 +85,7 @@ class CatalogWindow:
 
         # Заголовок (по центру)
         tk.Label(header, text="КАТАЛОГ НЕДВИЖИМОСТИ",
-                 font=(FONT_FAMILY, FONT_SIZE_TITLE, "bold"),
+                 font=font(FONT_SIZE_TITLE, bold=True),
                  bg=COLOR_SECONDARY_BG).pack(expand=True)
 
         # Область с прокруткой
@@ -97,11 +107,21 @@ class CatalogWindow:
         scrollbar.pack(side="right", fill="y")
 
     def load_products(self):
-        products = db.get_all_products()
+        """Загружает товары с обработкой ошибок."""
+        products = safe_call(db.get_all_products) or []
+
+        if not products:
+            messagebox.showwarning(
+                "Нет данных",
+                "Товары не найдены в базе данных"
+            )
+            return
+
         for p in products:
-            create_product_card(self.catalog_frame, p)
+            safe_call(create_product_card, self.catalog_frame, p)
 
     def run(self):
+        """Запускает главный цикл приложения."""
         self.root.mainloop()
 
 

@@ -93,7 +93,7 @@ def _add_text_info(card, product, bg_color, qty):
                bold=True, size=FONT_SIZE_HEADER, align="e")
 
 
-def _open_view(parent, product):
+def _open_view(parent, product, refresh=None):
     """
     Открывает форму просмотра товара.
 
@@ -101,10 +101,10 @@ def _open_view(parent, product):
     :param product: объект Product
     """
     from view_form import ViewForm
-    ViewForm(parent, product)
+    ViewForm(parent, product, on_add_to_order=refresh)
 
 
-def create_product_card(parent, product):
+def create_product_card(parent, product, refresh=None):
     """Создаёт карточку товара по макету."""
     qty = product.quantity
     bg_color = _get_card_color(qty)
@@ -115,15 +115,10 @@ def create_product_card(parent, product):
     _add_image(card, product, bg_color)
     _add_text_info(card, product, bg_color, qty)
 
-
     def _on_card_click(event=None):
-        """Обработчик клика на карточку."""
-        _open_view(parent, product)
-
+        _open_view(parent, product, refresh)
 
     card.bind("<Button-1>", _on_card_click)
-
-
     for child in card.winfo_children():
         child.bind("<Button-1>", _on_card_click)
         for subchild in child.winfo_children():

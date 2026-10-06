@@ -8,6 +8,11 @@ from config import (
     FONT_FAMILY, COLOR_HIGHLIGHT
 )
 from error_handler import validate_positive_int
+from order_manager import (
+    add_order_to_db,
+    update_product_quantity,
+    get_product_quantity
+)
 
 FONT_SIZE_NORMAL = 12
 FONT_SIZE_HEADER = 14
@@ -20,15 +25,26 @@ def font(size=FONT_SIZE_NORMAL, bold=False):
 
 
 class ViewForm:
-    """Форма просмотра выбранного товара."""
+    """
+    Форма просмотра выбранного товара.
+
+    Открывается при клике на карточку в каталоге.
+    """
 
     def __init__(self, parent, product, on_add_to_order=None):
+        """
+        Инициализация формы.
+
+        :param parent: родительское окно
+        :param product: объект Product из БД
+        :param on_add_to_order: callback для обновления каталога
+        """
         self.product = product
         self.on_add_to_order = on_add_to_order
 
         self.window = tk.Toplevel(parent)
         self.window.title(f"Просмотр — {product.ptype}")
-        self.window.geometry("700x600")
+        self.window.geometry("700x650")
         self.window.configure(bg=COLOR_MAIN_BG)
         self.build_ui()
 
@@ -47,20 +63,21 @@ class ViewForm:
         main = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         main.pack(fill="both", expand=True, padx=20, pady=20)
 
-        # Изображение
+        # Изображение (слева)
         img_frame = tk.Frame(main, bg=COLOR_MAIN_BG)
-        img_frame.pack(side="left", padx=10)
+        img_frame.pack(side="left", padx=10, anchor="n")
 
         photo = self._load_photo()
         if photo:
-            img_label = tk.Label(img_frame, image=photo, bg=COLOR_MAIN_BG)
-            img_label.image = photo
+            img_label = tk.Label(img_frame, image=photo,
+                                 bg=COLOR_MAIN_BG)
+            img_label.image = photo  # сохраняем ссылку!
             img_label.pack()
         else:
             tk.Label(img_frame, text="[НЕТ ФОТО]", bg=COLOR_MAIN_BG,
                      width=15, height=10).pack()
 
-        # Информация
+        # Информация (справа)
         info_frame = tk.Frame(main, bg=COLOR_MAIN_BG)
         info_frame.pack(side="left", fill="both", expand=True, padx=20)
 
@@ -69,14 +86,18 @@ class ViewForm:
         self._add_field(info_frame, "Категория", self.product.ptype)
         self._add_field(info_frame, "Площадь",
                         f"{self.product.area} кв.м")
-        self._add_field(info_frame, "Количество", self.product.quantity)
+        self._add_field(info_frame, "Количество",
+                        self.product.quantity)
 
+        # Цена со скидкой 5% при площади > 100
         area = self.product.area if self.product.area is not None else 0
         price = self.product.price if self.product.price is not None else 0
+
         if area > 100:
             price_text = f"{price * 0.95:,.0f} руб. (скидка 5%)"
         else:
             price_text = f"{price:,.0f} руб."
+
         self._add_field(info_frame, "Цена", price_text)
 
         qty_frame = tk.Frame(info_frame, bg=COLOR_MAIN_BG)
@@ -95,7 +116,7 @@ class ViewForm:
                   bg=COLOR_ACCENT, fg="white",
                   font=font(FONT_SIZE_NORMAL)).pack(side="left")
 
-        # Кнопки
+        # Кнопки внизу
         btn_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         btn_frame.pack(fill="x", pady=10)
 
@@ -110,6 +131,7 @@ class ViewForm:
                   bg=COLOR_ACCENT, fg="white",
                   font=font(FONT_SIZE_NORMAL),
                   padx=15, pady=5).pack(side="right", padx=20)
+
 
     def _load_photo(self):
         """Загружает фото товара или заглушку."""
@@ -128,7 +150,13 @@ class ViewForm:
             return None
 
     def _add_field(self, parent, label, value):
-        """Добавляет поле в форму."""
+        """
+        Добавляет поле в форму.
+
+        :param parent: родительский фрейм
+        :param label: название поля
+        :param value: значение
+        """
         row = tk.Frame(parent, bg=COLOR_MAIN_BG)
         row.pack(fill="x", pady=2)
 
@@ -142,26 +170,8 @@ class ViewForm:
                  anchor="w",
                  bg=COLOR_MAIN_BG).pack(side="left")
 
-    def add_to_order(self):
-        """Обработчик кнопки «Добавить в заказ»."""
-        if self.on_add_to_order is None:
-            messagebox.showinfo("Информация",
-                                "Функция в разработке")
-            return
-
-        if self.product is None:
-            messagebox.showerror("Ошибка", "Товар не выбран")
-            return
-
-        try:
-            self.on_add_to_order(self.product)
-            messagebox.showinfo("Успех", "Товар добавлен в заказ")
-        except Exception as e:
-            messagebox.showerror("Ошибка заказа",
-                                 f"Не удалось добавить товар:\n{e}")
-
     def _check_qty(self):
-        """Проверяет введённое количество."""
+        """Проверяет введённое количество через validate_positive_int."""
         ok, result = validate_positive_int(
             self.qty_var.get(), "Количество"
         )
@@ -169,3 +179,45 @@ class ViewForm:
             messagebox.showinfo("OK", f"Введено: {result}")
         else:
             messagebox.showerror("Ошибка", result)
+
+    def add_to_order(self):
+        """Обработчик кнопки «Добавить в заказ»."""
+        if self.product is None:
+            messagebox.showerror("Ошибка", "Товар не выбран")
+            return
+
+        try:
+            product_id = self.product.id
+            current_qty = get_product_quantity(product_id)
+
+            if current_qty < 1:
+                messagebox.showwarning(
+                    "Товар закончился",
+                    f"Товара «{self.product.ptype}» больше нет"
+                )
+                return
+
+            new_qty = current_qty - 1
+
+            client = "Сидоров Сидор Сидорович"
+
+            order_id = add_order_to_db(client, product_id, 1)
+            update_product_quantity(product_id, new_qty)
+
+            messagebox.showinfo(
+                "Успех",
+                f"Заказ №{order_id} оформлен\n"
+                f"Товар: {self.product.ptype}\n"
+                f"Остаток: {new_qty} шт."
+            )
+
+            if self.on_add_to_order is not None:
+                self.on_add_to_order()
+
+            self.window.destroy()
+
+        except Exception as e:
+            messagebox.showerror(
+                "Ошибка заказа",
+                f"Не удалось оформить заказ:\n{e}"
+            )

@@ -108,13 +108,9 @@ class ViewForm:
                  bg=COLOR_MAIN_BG).pack(side="left")
 
         self.qty_var = tk.StringVar(value="1")
-        tk.Entry(qty_frame, textvariable=self.qty_var,
-                 width=10).pack(side="left", padx=10)
-
-        tk.Button(qty_frame, text="Проверить",
-                  command=self._check_qty,
-                  bg=COLOR_ACCENT, fg="white",
-                  font=font(FONT_SIZE_NORMAL)).pack(side="left")
+        qty_entry = tk.Entry(qty_frame, textvariable=self.qty_var,
+                 width=10)
+        qty_entry.pack(side="left", padx=10)
 
         # Кнопки внизу
         btn_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
@@ -170,18 +166,16 @@ class ViewForm:
                  anchor="w",
                  bg=COLOR_MAIN_BG).pack(side="left")
 
-    def _check_qty(self):
-        """Проверяет введённое количество через validate_positive_int."""
+    def add_to_order(self):
+        """Обработчик кнопки «Добавить в заказ»."""
         ok, result = validate_positive_int(
             self.qty_var.get(), "Количество"
         )
-        if ok:
-            messagebox.showinfo("OK", f"Введено: {result}")
-        else:
-            messagebox.showerror("Ошибка", result)
+        if not ok:
+            messagebox.showerror("Ошибка ввода", result)
+            return
+        qty = result
 
-    def add_to_order(self):
-        """Обработчик кнопки «Добавить в заказ»."""
         if self.product is None:
             messagebox.showerror("Ошибка", "Товар не выбран")
             return
@@ -193,11 +187,14 @@ class ViewForm:
             if current_qty < 1:
                 messagebox.showwarning(
                     "Товар закончился",
-                    f"Товара «{self.product.ptype}» больше нет"
+                    f"Товара {self.product.ptype} больше нет"
                 )
                 return
 
-            new_qty = current_qty - 1
+            if qty > current_qty:
+                messagebox.showwarning("Внимание", f"В наличии только {current_qty} шт.")
+                return
+            new_qty = current_qty - qty
 
             client = "Сидоров Сидор Сидорович"
 

@@ -107,14 +107,12 @@ class CatalogWindow:
         scrollbar.pack(side="right", fill="y")
 
     def load_products(self):
-        """Загружает товары с обработкой ошибок."""
+        """Загружает товары с обработкой ошибок (ДЗ Задание 3)."""
         products = safe_call(db.get_all_products) or []
 
         if not products:
-            messagebox.showwarning(
-                "Нет данных",
-                "Товары не найдены в базе данных"
-            )
+            messagebox.showwarning("Нет данных",
+                                   "Товары не найдены в БД")
             return
 
         for p in products:

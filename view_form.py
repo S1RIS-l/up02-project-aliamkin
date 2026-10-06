@@ -7,6 +7,7 @@ from config import (
     COLOR_MAIN_BG, COLOR_SECONDARY_BG, COLOR_ACCENT,
     FONT_FAMILY, COLOR_HIGHLIGHT
 )
+from error_handler import validate_positive_int
 
 FONT_SIZE_NORMAL = 12
 FONT_SIZE_HEADER = 14
@@ -19,19 +20,9 @@ def font(size=FONT_SIZE_NORMAL, bold=False):
 
 
 class ViewForm:
-    """
-    Форма просмотра выбранного товара.
-    Открывается при клике на карточку в каталоге.
-    """
+    """Форма просмотра выбранного товара."""
 
     def __init__(self, parent, product, on_add_to_order=None):
-        """
-        Инициализация формы.
-
-        :param parent: родительское окно
-        :param product: объект Product из БД
-        :param on_add_to_order: callback для добавления в заказ
-        """
         self.product = product
         self.on_add_to_order = on_add_to_order
 
@@ -43,7 +34,7 @@ class ViewForm:
 
     def build_ui(self):
         """Строит интерфейс формы."""
-        # Шапка — ГОТОВО
+        # Шапка
         header = tk.Frame(self.window, bg=COLOR_SECONDARY_BG, height=60)
         header.pack(fill="x")
         header.pack_propagate(False)
@@ -52,9 +43,11 @@ class ViewForm:
                  font=font(FONT_SIZE_TITLE, bold=True),
                  bg=COLOR_SECONDARY_BG).pack(pady=15)
 
+        # Основная область
         main = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         main.pack(fill="both", expand=True, padx=20, pady=20)
 
+        # Изображение
         img_frame = tk.Frame(main, bg=COLOR_MAIN_BG)
         img_frame.pack(side="left", padx=10)
 
@@ -67,6 +60,7 @@ class ViewForm:
             tk.Label(img_frame, text="[НЕТ ФОТО]", bg=COLOR_MAIN_BG,
                      width=15, height=10).pack()
 
+        # Информация
         info_frame = tk.Frame(main, bg=COLOR_MAIN_BG)
         info_frame.pack(side="left", fill="both", expand=True, padx=20)
 
@@ -77,7 +71,6 @@ class ViewForm:
                         f"{self.product.area} кв.м")
         self._add_field(info_frame, "Количество", self.product.quantity)
 
-        # Цена со скидкой 5% при площади > 100
         area = self.product.area if self.product.area is not None else 0
         price = self.product.price if self.product.price is not None else 0
         if area > 100:
@@ -86,7 +79,23 @@ class ViewForm:
             price_text = f"{price:,.0f} руб."
         self._add_field(info_frame, "Цена", price_text)
 
-        # Кнопки — ДОПИСАНО
+        qty_frame = tk.Frame(info_frame, bg=COLOR_MAIN_BG)
+        qty_frame.pack(fill="x", pady=10)
+
+        tk.Label(qty_frame, text="Количество:",
+                 font=font(FONT_SIZE_NORMAL, bold=True),
+                 bg=COLOR_MAIN_BG).pack(side="left")
+
+        self.qty_var = tk.StringVar(value="1")
+        tk.Entry(qty_frame, textvariable=self.qty_var,
+                 width=10).pack(side="left", padx=10)
+
+        tk.Button(qty_frame, text="Проверить",
+                  command=self._check_qty,
+                  bg=COLOR_ACCENT, fg="white",
+                  font=font(FONT_SIZE_NORMAL)).pack(side="left")
+
+        # Кнопки
         btn_frame = tk.Frame(self.window, bg=COLOR_MAIN_BG)
         btn_frame.pack(fill="x", pady=10)
 
@@ -107,7 +116,8 @@ class ViewForm:
         import os
         from PIL import Image, ImageTk
 
-        path = self.product.photo if self.product.photo else "resources/picture.png"
+        path = (self.product.photo if self.product.photo
+                else "resources/picture.png")
         if not os.path.exists(path):
             path = "resources/picture.png"
 
@@ -117,17 +127,8 @@ class ViewForm:
         except Exception:
             return None
 
-    # =========================================
-    # ЗАДАНИЕ 4.1. Метод _add_field
-    # =========================================
     def _add_field(self, parent, label, value):
-        """
-        Добавляет поле в форму.
-
-        :param parent: родительский фрейм
-        :param label: название поля
-        :param value: значение
-        """
+        """Добавляет поле в форму."""
         row = tk.Frame(parent, bg=COLOR_MAIN_BG)
         row.pack(fill="x", pady=2)
 
@@ -141,28 +142,30 @@ class ViewForm:
                  anchor="w",
                  bg=COLOR_MAIN_BG).pack(side="left")
 
-    # =========================================
-    # ЗАДАНИЕ 4.4. Метод add_to_order
-    # =========================================
     def add_to_order(self):
         """Обработчик кнопки «Добавить в заказ»."""
-        # 1. Если callback отсутствует
         if self.on_add_to_order is None:
             messagebox.showinfo("Информация",
                                 "Функция в разработке")
             return
 
-        # 2. Если товар пустой
         if self.product is None:
             messagebox.showerror("Ошибка", "Товар не выбран")
             return
 
-        # 3-5. Обернуть вызов в try-except
         try:
             self.on_add_to_order(self.product)
             messagebox.showinfo("Успех", "Товар добавлен в заказ")
         except Exception as e:
-            messagebox.showerror(
-                "Ошибка заказа",
-                f"Не удалось добавить товар:\n{e}"
-            )
+            messagebox.showerror("Ошибка заказа",
+                                 f"Не удалось добавить товар:\n{e}")
+
+    def _check_qty(self):
+        """Проверяет введённое количество."""
+        ok, result = validate_positive_int(
+            self.qty_var.get(), "Количество"
+        )
+        if ok:
+            messagebox.showinfo("OK", f"Введено: {result}")
+        else:
+            messagebox.showerror("Ошибка", result)

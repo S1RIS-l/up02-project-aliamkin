@@ -141,3 +141,38 @@ def get_last_order_id():
     row = cur.fetchone()
     conn.close()
     return row[0] if row and row[0] is not None else None
+
+def get_order_items(order_id):
+    """
+    Возвращает состав заказа.
+
+    :param order_id: id заказа
+    :return: список кортежей (id, название, количество, цена)
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT Состав_заказа.id, Товар.тип,
+               Состав_заказа.количество, Состав_заказа.цена
+        FROM Состав_заказа
+        JOIN Товар ON Состав_заказа.товар_id = Товар.id
+        WHERE Состав_заказа.заказ_id = ?
+    """, (order_id,))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+def get_all_orders():
+    """
+    Возвращает список всех заказов.
+
+    :return: список кортежей (id, дата, клиент)
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, дата, клиент FROM Заказ ORDER BY id DESC"
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows

@@ -57,12 +57,24 @@ class CatalogWindow:
         """Устанавливает иконку приложения."""
         set_app_icon(self.root, PATH_ICON)
 
+    def open_orders(self):
+        """Открывает окно списка заказов."""
+        from orders_window import OrdersWindow
+        OrdersWindow(self.root)
+
     def build_ui(self):
         """Строит интерфейс главного окна."""
         # Шапка
         header = tk.Frame(self.root, bg=COLOR_SECONDARY_BG, height=80)
         header.pack(fill="x")
         header.pack_propagate(False)
+
+        # Кнопка «Заказы» (справа)
+        tk.Button(header, text="Заказы",
+                  command=self.open_orders,
+                  bg=COLOR_ACCENT, fg="white",
+                  font=font(FONT_SIZE_NORMAL),
+                  padx=10, pady=5).pack(side="right", padx=10)
 
         # Логотип (слева)
         logo = None

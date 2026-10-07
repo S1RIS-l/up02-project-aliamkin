@@ -50,7 +50,7 @@ class OrderItemsWindow:
                  bg=COLOR_SECONDARY_BG).pack(pady=15)
 
         # Таблица позиций
-        # Колонки: тип, адрес, количество, цена, сумма (без размера!)
+        # Колонки: тип, адрес, количество, цена, сумма
         columns = ("name", "address", "quantity", "price", "total")
         self.tree = ttk.Treeview(
             self.window,

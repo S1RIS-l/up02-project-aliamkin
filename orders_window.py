@@ -10,7 +10,6 @@ from config import (
 import order_manager as om
 
 FONT_SIZE_NORMAL = 12
-FONT_SIZE_HEADER = 14
 FONT_SIZE_TITLE = 18
 
 
@@ -22,8 +21,15 @@ def font(size=FONT_SIZE_NORMAL, bold=False):
 class OrdersWindow:
     """Окно списка заказов."""
 
-    def __init__(self, parent):
-        """Инициализация окна."""
+    def __init__(self, parent, current_user=None):
+        """
+        Инициализация окна.
+
+        :param parent: родительское окно
+        :param current_user: кортеж (id, фамилия, имя, отчество, логин, роль)
+        """
+        self.current_user = current_user
+
         self.window = tk.Toplevel(parent)
         self.window.title("Список заказов")
         self.window.geometry("800x500")
@@ -84,11 +90,9 @@ class OrdersWindow:
 
     def load_orders(self):
         """Загружает заказы из БД."""
-        # Очищаем таблицу
         for row in self.tree.get_children():
             self.tree.delete(row)
 
-        # Загружаем заказы
         try:
             orders = om.get_all_orders()
             for order in orders:
@@ -106,10 +110,9 @@ class OrdersWindow:
             messagebox.showwarning("Ошибка", "Выберите заказ")
             return
 
-        # Получаем данные выбранного заказа
         item = self.tree.item(selected[0])
         order_id = item["values"][0]
 
-        # Открываем окно состава заказа
+        # Открываем окно состава заказа (передаём current_user)
         from order_items_window import OrderItemsWindow
-        OrderItemsWindow(self.window, order_id)
+        OrderItemsWindow(self.window, order_id, self.current_user)

@@ -9,8 +9,7 @@ from config import (
 )
 from error_handler import validate_positive_int
 from order_manager import (
-    add_order_to_db,
-    update_product_quantity,
+    create_order,
     get_product_quantity
 )
 
@@ -168,38 +167,48 @@ class ViewForm:
 
     def add_to_order(self):
         """Обработчик кнопки «Добавить в заказ»."""
-        ok, result = validate_positive_int(
-            self.qty_var.get(), "Количество"
-        )
-        if not ok:
-            messagebox.showerror("Ошибка ввода", result)
-            return
-        qty = result
-
         if self.product is None:
             messagebox.showerror("Ошибка", "Товар не выбран")
             return
 
-        try:
-            product_id = self.product.id
-            current_qty = get_product_quantity(product_id)
+        ok, result = validate_positive_int(
+            self.qty_var.get(), "Количество"
+        )
+        if not ok:
+            messagebox.showwarning("Ошибка ввода", result)
+            return
+        qty = result
 
-            if current_qty < 1:
-                messagebox.showwarning(
-                    "Товар закончился",
-                    f"Товара {self.product.ptype} больше нет"
+        current_qty = get_product_quantity(self.product.id)
+        if qty > current_qty:
+            messagebox.showwarning(
+                "Ошибка",
+                f"Доступно только {current_qty} шт."
+            )
+            return
+
+        try:
+            client = "Сидоров Сидор Сидорович"
+            price = self.product.price or 0
+
+            items = [(self.product.id, qty, price)]
+            order_id = create_order(client, items)
+
+            if order_id is None:
+                messagebox.showerror(
+                    "Ошибка",
+                    "Не удалось создать заказ"
                 )
                 return
 
-            if qty > current_qty:
-                messagebox.showwarning("Внимание", f"В наличии только {current_qty} шт.")
-                return
-            new_qty = current_qty - qty
+            new_qty = get_product_quantity(self.product.id)
 
-            client = "Сидоров Сидор Сидорович"
-
-            order_id = add_order_to_db(client, product_id, 1)
-            update_product_quantity(product_id, new_qty)
+            if new_qty <= 3:
+                messagebox.showwarning(
+                    "Внимание",
+                    f"Товар «{self.product.ptype}» заканчивается!\n"
+                    f"Осталось {new_qty} шт."
+                )
 
             messagebox.showinfo(
                 "Успех",

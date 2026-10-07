@@ -232,6 +232,5 @@ class CatalogWindow:
             print("Приложение закрыто (Ctrl+C)")
             self.root.destroy()
 
-
 if __name__ == "__main__":
     CatalogWindow().run()

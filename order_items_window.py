@@ -21,7 +21,7 @@ def font(size=FONT_SIZE_NORMAL, bold=False):
 class OrderItemsWindow:
     """Окно состава заказа."""
 
-    def __init__(self, parent, order_id):
+    def __init__(self, parent, order_id, current_user = None):
         """
         Инициализация окна.
 
@@ -29,6 +29,7 @@ class OrderItemsWindow:
         :param order_id: id заказа
         """
         self.order_id = order_id
+        self.current_user = current_user
 
         self.window = tk.Toplevel(parent)
         self.window.title(f"Состав заказа №{order_id}")

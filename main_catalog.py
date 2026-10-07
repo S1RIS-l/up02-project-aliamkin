@@ -142,6 +142,5 @@ class CatalogWindow:
         """Запускает главный цикл приложения."""
         self.root.mainloop()
 
-
 if __name__ == "__main__":
     CatalogWindow().run()

@@ -5,8 +5,9 @@ from PIL import Image, ImageTk
 import os
 
 from config import COLOR_HIGHLIGHT, FONT_FAMILY
+from config import RESOURCES_DIR
 
-PATH_PICTURE = "resources/picture.png"
+PATH_PICTURE = os.path.join(RESOURCES_DIR, "picture.png")
 
 FONT_SIZE_NORMAL = 11
 FONT_SIZE_HEADER = 14
@@ -37,22 +38,39 @@ def _add_label(parent, text, bg_color, bold=False,
 
 
 def _add_image(card, product, bg_color):
-    """Добавляет изображение товара (или заглушку)."""
+    """
+    Добавляет изображение товара (или заглушку).
+
+    :param card: карточка (tk.Frame)
+    :param product: объект Product
+    :param bg_color: цвет фона
+    """
     img_frame = tk.Frame(card, bg=bg_color)
     img_frame.pack(side="left", padx=10, pady=10)
 
-    # Проверка существования файла
-    image_path = product.photo if product.photo else PATH_PICTURE
+    if product.photo:
+        image_path = os.path.join(RESOURCES_DIR, product.photo)
+    else:
+        image_path = PATH_PICTURE
+
     if not os.path.exists(image_path):
         image_path = PATH_PICTURE
 
+    if not os.path.exists(image_path):
+        tk.Label(img_frame, text="[НЕТ ФОТО]", bg=bg_color,
+                 width=10, height=5).pack()
+        return
+    
     try:
         img = Image.open(image_path).resize((100, 100))
         photo = ImageTk.PhotoImage(img)
+
         img_label = tk.Label(img_frame, image=photo, bg=bg_color)
-        img_label.image = photo  # сохраняем ссылку!
+        img_label.image = photo  # сохраняем ссылку, иначе исчезнет!
         img_label.pack()
-    except Exception:
+
+    except Exception as e:
+        print(f"⚠️ Ошибка загрузки {image_path}: {e}")
         tk.Label(img_frame, text="[НЕТ ФОТО]", bg=bg_color,
                  width=10, height=5).pack()
 

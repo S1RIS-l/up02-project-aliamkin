@@ -21,7 +21,7 @@ FONT_FAMILY = "Calibri"
 FONT_SIZE_NORMAL = 12
 FONT_SIZE_TITLE = 18
 
-PATH_LOGO = "resources/logo.png"
+PATH_LOGO = "resources/logo1.png"
 PATH_ICON = "resources/icon.ico"
 
 

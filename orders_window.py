@@ -107,12 +107,10 @@ class OrdersWindow:
         """Обработчик выбора заказа."""
         selected = self.tree.selection()
         if not selected:
-            messagebox.showwarning("Ошибка", "Выберите заказ")
             return
-
+        
         item = self.tree.item(selected[0])
         order_id = item["values"][0]
-
-        # Открываем окно состава заказа (передаём current_user)
+        
         from order_items_window import OrderItemsWindow
         OrderItemsWindow(self.window, order_id, self.current_user)

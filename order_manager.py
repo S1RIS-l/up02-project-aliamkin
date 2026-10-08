@@ -206,6 +206,99 @@ def get_order_total(order_id):
     conn.close()
     return row[0] or 0.0
 
+def update_order_date(order_id, new_date):
+    """
+    Обновляет дату заказа.
+
+    :param order_id: id заказа
+    :param new_date: новая дата (YYYY-MM-DD)
+    :return: True при успехе, False при ошибке
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute(
+            "UPDATE Заказ SET дата = ? WHERE id = ?",
+            (new_date, order_id)
+        )
+        conn.commit()
+        return True
+
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Ошибка обновления даты: {e}")
+        return False
+
+    finally:
+        conn.close()
+
+
+def get_order_by_id(order_id):
+    """
+    Возвращает заказ по id.
+
+    :param order_id: id заказа
+    :return: кортеж (id, дата, клиент) или None
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, дата, клиент FROM Заказ WHERE id = ?",
+        (order_id,)
+    )
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+def delete_order_item(item_id):
+    """
+    Удаляет позицию из состава заказа и восстанавливает остатки.
+
+    :param item_id: id позиции
+    :return: True при успехе, False при ошибке
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+
+    try:
+        # 1. Получаем данные позиции (товар + количество)
+        cur.execute("""
+            SELECT товар_id, количество
+            FROM Состав_заказа
+            WHERE id = ?
+        """, (item_id,))
+        row = cur.fetchone()
+
+        if not row:
+            return False
+
+        product_id, quantity = row
+
+        # 2. Удаляем позицию
+        cur.execute(
+            "DELETE FROM Состав_заказа WHERE id = ?",
+            (item_id,)
+        )
+
+        # 3. Восстанавливаем остатки
+        cur.execute("""
+            UPDATE Товар
+            SET количество = количество + ?
+            WHERE id = ?
+        """, (quantity, product_id))
+
+        conn.commit()
+        return True
+
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ Ошибка удаления позиции: {e}")
+        return False
+
+    finally:
+        conn.close()
+
 def get_all_orders():
     """
     Возвращает список всех заказов.

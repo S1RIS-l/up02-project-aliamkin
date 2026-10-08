@@ -1,25 +1,16 @@
-"""Модели данных для проекта УП.02"""
+"""Модели данных для проекта"""
 
 from datetime import datetime
 from discount import calculate_price_with_discount
 
 
 class Product:
-    """Класс Товар (объект недвижимости)."""
+    """Класс Товар."""
 
-    def __init__(self, product_id, ptype, address, area, price,
-                 quantity, photo=None):
-        """
-        :param product_id: id
-        :param ptype: тип (Студия, Пентхаус, …)
-        :param address: адрес
-        :param area: площадь, кв.м
-        :param price: цена
-        :param quantity: количество
-        :param photo: имя файла изображения
-        """
+    def __init__(self, product_id, ptype, address, area,
+                 price, quantity, photo=None):
         self.id = product_id
-        self.ptype = ptype          # ← добавили, чтобы совпадало с db_products
+        self.ptype = ptype
         self.address = address
         self.area = area
         self.price = price

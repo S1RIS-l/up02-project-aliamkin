@@ -224,6 +224,7 @@ class CatalogWindow:
             widget.destroy()
         self.load_products()
 
+
     def run(self):
         """Запускает главный цикл приложения."""
         try:
